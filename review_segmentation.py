@@ -101,7 +101,7 @@ class Segmentation:
         with open('./unique_spacy_pos_pattern.pkl', 'rb') as fd:
             pattern_set = pickle.load(fd)['pattern']
 
-        with open(file_path) as fd:
+        with open(file_path, encoding='utf8') as fd:
             for line in fd:
                 if 'eos-eos' in line or len(line) < 4:
                     continue
