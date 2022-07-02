@@ -60,11 +60,11 @@ def training(args):
 
 
 def inference(args):
-    # model = AutoModelForSequenceClassification.from_pretrained(
-    #     "malsalih/autotrain-segment-polarity-classification-1063636922", use_auth_token=True)
-    #
-    # tokenizer = AutoTokenizer.from_pretrained("malsalih/autotrain-segment-polarity-classification-1063636922",
-    #                                           use_auth_token=True)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "malsalih/autotrain-segment-polarity-classification-1063636922", use_auth_token='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')
+
+    tokenizer = AutoTokenizer.from_pretrained("malsalih/autotrain-segment-polarity-classification-1063636922",
+                                              use_auth_token='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')
 
     def get_input_files(folder_path_pattern):
         folder = folder_path_pattern[:-3]
@@ -75,51 +75,39 @@ def inference(args):
 
     input_files = get_input_files(args.folder_path_pattern)
 
-    print(input_files)
+    dataset = load_dataset("text", data_files=input_files[:50])
 
-    for indx,input_file in enumerate(input_files[16:18]):
-        print(indx, '~' * 100)
-        with open(input_file) as fd:
-            for string in fd.readlines():
-                try:
-                    string.encode('utf-8')
-                except UnicodeError:
-                    pass
-                print(string)
+    print(dataset['train']['text'])
 
-    dataset = load_dataset("text", data_files=input_files[17])
+    def encode(batch):
+        return tokenizer(batch['text'], truncation=True)
 
-    print(len(dataset['train']['text']))
+    dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
 
-    # def encode(batch):
-    #     return tokenizer(batch['text'], truncation=True)
-    #
-    # dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
-    #
-    # training_args = TrainingArguments(
-    #     output_dir=args.output_data_dir,
-    #     num_train_epochs=args.epochs,
-    #     per_device_train_batch_size=args.train_batch_size,
-    #     per_device_eval_batch_size=args.eval_batch_size,
-    #     evaluation_strategy="epoch",
-    #     save_strategy='epoch',
-    #     logging_dir=f"{args.output_data_dir}/logs",
-    #     learning_rate=args.learning_rate,
-    #     lr_scheduler_type='linear',
-    #     group_by_length=args.group_by_length,
-    #     gradient_checkpointing=args.gradient_checkpointing,
-    # )
-    # trainer = Trainer(
-    #     model=model,
-    #     args=training_args,
-    #     # compute_metrics=compute_metrics,
-    #     # train_dataset=dataset['train'],
-    #     eval_dataset=dataset['train'],
-    #     tokenizer=tokenizer,
-    # )
-    # results = trainer.predict(test_dataset=dataset['train']).predictions
-    # values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
-    # print(values)
+    training_args = TrainingArguments(
+        output_dir=args.output_data_dir,
+        num_train_epochs=args.epochs,
+        per_device_train_batch_size=args.train_batch_size,
+        per_device_eval_batch_size=args.eval_batch_size,
+        evaluation_strategy="epoch",
+        save_strategy='epoch',
+        logging_dir=f"{args.output_data_dir}/logs",
+        learning_rate=args.learning_rate,
+        lr_scheduler_type='linear',
+        group_by_length=args.group_by_length,
+        gradient_checkpointing=args.gradient_checkpointing,
+    )
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        # compute_metrics=compute_metrics,
+        # train_dataset=dataset['train'],
+        eval_dataset=dataset['train'],
+        tokenizer=tokenizer,
+    )
+    results = trainer.predict(test_dataset=dataset['train']).predictions
+    values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
+    print(values)
 
 
 def main():

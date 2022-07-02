@@ -72,6 +72,7 @@ class Rainforest:
         asins = [product['asin'] for product in results]
         return asins
 
+    @staticmethod
     def save_reviews(self, reviews, file_path):
         with open(file_path, 'w', encoding='utf8') as fd:
             fd.write("\n\neos-eos\n\n".join(reviews))
@@ -113,7 +114,7 @@ class Segmentation:
                     token_list, pos_tuple = cls.pre_process_and_validation_check(segment)
                     if token_list:
                         segment = " ".join([token.text for token in token_list])
-                        if pos_tuple in pattern_set:
+                        if pos_tuple in pattern_set and len(segment) == len(segment.encode('utf8')):
                             print(segment)
                             with open(output_path, 'a') as fd:
                                 fd.write(segment)
