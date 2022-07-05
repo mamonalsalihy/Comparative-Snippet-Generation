@@ -1,7 +1,7 @@
 import json, os
 
 input_folder = "./review_data/segments/"
-output_file = "./qt/data/json/qt_train.json"
+output_file = "../qt/data/json/qt_train.json"
 
 data_list = []
 
@@ -24,5 +24,5 @@ for file in os.listdir(input_folder):
 
     data_list.append(entity_dict)
 
-with open(output_file, "w") as out_f:
+with open(output_file, "w+") as out_f:
     out_f.write(json.dumps(data_list))

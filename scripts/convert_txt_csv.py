@@ -3,7 +3,7 @@ import pandas as pd
 
 def main():
     result = []
-    with open('./spot-data/data/spot-yelp13-edus.txt') as fd:
+    with open('../spot-data/data/spot-yelp13-edus.txt') as fd:
         for line in fd:
             data = {}
             line = line.split()

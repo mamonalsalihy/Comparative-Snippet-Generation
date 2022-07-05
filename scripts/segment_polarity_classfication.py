@@ -5,7 +5,6 @@ from tqdm import tqdm
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import argparse
-import pandas as pd
 
 
 def training(args):
@@ -58,7 +57,7 @@ def training(args):
         tokenizer=tokenizer,
     )
 
-    # trainer.train()
+    trainer.train()
 
 
 def inference(args):

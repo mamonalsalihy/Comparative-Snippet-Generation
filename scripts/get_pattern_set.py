@@ -7,7 +7,7 @@ def main():
     :return:
     """
     pattern_set = set()
-    with open('./pattern_set') as fd:
+    with open('pattern_set') as fd:
         for line in fd:
             line = line.strip()
             line = line.replace('\"','')
@@ -16,7 +16,7 @@ def main():
             elif line[-1] == '}' or line[-1] == ',':
                 pattern_set.add(eval(line[:-1]))
 
-    output_file = './unique_spacy_pos_pattern.pkl'
+    output_file = 'unique_spacy_pos_pattern.pkl'
     with open(output_file, "wb") as out_f:
         pickle.dump({"pattern": pattern_set}, out_f)
 
