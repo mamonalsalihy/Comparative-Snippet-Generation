@@ -4,6 +4,7 @@ from datasets import load_dataset, concatenate_datasets
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import argparse
+import pandas as pd
 
 
 def training(args):
@@ -107,7 +108,13 @@ def inference(args):
     )
     results = trainer.predict(test_dataset=dataset['train']).predictions
     values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
-    print(values)
+    values = pd.Series(values)
+    negative_segments = values[values == 0]
+    positive_segments = values[values == 1]
+    negative_segments.to_csv('./review_data/negative_segments/negative_segments.csv')
+    positive_segments.to_csv('./review_data/positive_segments/positive_segments.csv')
+    print("Finished splitting files into polarity")
+
 
 
 def main():
