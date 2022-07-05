@@ -1,6 +1,7 @@
 import os
 
 from datasets import load_dataset, concatenate_datasets
+from tqdm import tqdm
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 import argparse
@@ -62,59 +63,56 @@ def training(args):
 
 def inference(args):
     model = AutoModelForSequenceClassification.from_pretrained(
-        "malsalih/autotrain-segment-polarity-classification-1063636922", use_auth_token='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')
+        "malsalih/autotrain-segment-polarity-classification-1063636922",
+        use_auth_token='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')
 
     tokenizer = AutoTokenizer.from_pretrained("malsalih/autotrain-segment-polarity-classification-1063636922",
                                               use_auth_token='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')
 
-    def get_input_files(folder_path_pattern):
-        folder = folder_path_pattern[:-3]
-        path_list = []
-        for file in os.listdir(folder):
-            path_list.append(folder_path_pattern.format(file))
-        return path_list
+    for file in tqdm(os.listdir(args.folder_path_pattern[:-3])):
+        dataset = load_dataset('text', data_files=[args.folder_path_pattern.format(file)])
 
-    input_files = get_input_files(args.folder_path_pattern)
+        def encode(batch):
+            return tokenizer(batch['text'], truncation=True)
 
-    dataset = load_dataset("text", data_files=input_files[:50])
+        dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
 
-    print(dataset['train']['text'])
+        training_args = TrainingArguments(
+            output_dir=args.output_data_dir,
+            num_train_epochs=args.epochs,
+            per_device_train_batch_size=args.train_batch_size,
+            per_device_eval_batch_size=args.eval_batch_size,
+            evaluation_strategy="epoch",
+            save_strategy='epoch',
+            logging_dir=f"{args.output_data_dir}/logs",
+            learning_rate=args.learning_rate,
+            lr_scheduler_type='linear',
+            group_by_length=args.group_by_length,
+            gradient_checkpointing=args.gradient_checkpointing,
+        )
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            # compute_metrics=compute_metrics,
+            # train_dataset=dataset['train'],
+            eval_dataset=dataset['train'],
+            tokenizer=tokenizer,
+        )
+        results = trainer.predict(test_dataset=dataset['train']).predictions
+        values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
 
-    def encode(batch):
-        return tokenizer(batch['text'], truncation=True)
+        pos_f = open(args.positive_directory.format(file), "w+")
+        neg_f = open(args.negative_directory.format(file), "w+")
 
-    dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
+        for text, label in values.items():
+            if label == 0:
+                neg_f.write(text + "\n")
+            else:
+                pos_f.write(text + "\n")
 
-    training_args = TrainingArguments(
-        output_dir=args.output_data_dir,
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=args.train_batch_size,
-        per_device_eval_batch_size=args.eval_batch_size,
-        evaluation_strategy="epoch",
-        save_strategy='epoch',
-        logging_dir=f"{args.output_data_dir}/logs",
-        learning_rate=args.learning_rate,
-        lr_scheduler_type='linear',
-        group_by_length=args.group_by_length,
-        gradient_checkpointing=args.gradient_checkpointing,
-    )
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        # compute_metrics=compute_metrics,
-        # train_dataset=dataset['train'],
-        eval_dataset=dataset['train'],
-        tokenizer=tokenizer,
-    )
-    results = trainer.predict(test_dataset=dataset['train']).predictions
-    values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
-    values = pd.Series(values)
-    negative_segments = values[values == 0]
-    positive_segments = values[values == 1]
-    negative_segments.to_csv('./review_data/negative_segments/negative_segments.csv')
-    positive_segments.to_csv('./review_data/positive_segments/positive_segments.csv')
-    print("Finished splitting files into polarity")
-
+        pos_f.close()
+        neg_f.close()
+        print("Finished splitting files into polarity")
 
 
 def main():
@@ -130,6 +128,8 @@ def main():
     parser.add_argument("--gradient_checkpointing", type=bool, default=False)
     parser.add_argument('--output_data_dir', type=str, default='./results')
     parser.add_argument('--folder_path_pattern', type=str, default='./review_data/segments/{}')
+    parser.add_argument('--positive_directory', type=str, default='./review_data/positive_segments/{}')
+    parser.add_argument('--negative_directory', type=str, default='./review_data/negative_segments/{}')
     parser.add_argument("--inference", type=bool, default=True)
     args = parser.parse_args()
 
