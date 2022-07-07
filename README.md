@@ -128,6 +128,14 @@ Note: need auth_token since model was trained using auto_train from huggingface
 
 ## Opinion Summarization
 
+### Setup
+````
+conda create --name quantized_transformer python=3.6
+conda activate quantized_transformer
+cd qt
+pip install -r requirements.txt
+````
+
 This is the script for data formatting `qt_custom_data.py`. Formatting is used twice.
 Once for creating the training set and once for creating the test set.
 
