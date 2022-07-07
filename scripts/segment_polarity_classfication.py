@@ -76,6 +76,8 @@ def inference(args):
 
         dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
 
+        dataset = dataset.remove_columns('text')
+
         training_args = TrainingArguments(
             output_dir=args.output_data_dir,
             num_train_epochs=args.epochs,
@@ -100,8 +102,11 @@ def inference(args):
         results = trainer.predict(test_dataset=dataset['train']).predictions
         values = {text: logits.argmax() for text, logits in zip(dataset['train']['text'], results)}
 
-        pos_f = open(args.positive_directory.format(file), "w+")
-        neg_f = open(args.negative_directory.format(file), "w+")
+        pos_file_name = file.replace("review", "positive")
+        neg_file_name = file.replace("review", "negative")
+
+        pos_f = open(args.positive_directory.format(pos_file_name), "w+")
+        neg_f = open(args.negative_directory.format(neg_file_name), "w+")
 
         for text, label in values.items():
             if label == 0:
@@ -126,9 +131,9 @@ def main():
     parser.add_argument("--group_by_length", type=bool, default=True)
     parser.add_argument("--gradient_checkpointing", type=bool, default=False)
     parser.add_argument('--output_data_dir', type=str, default='./results')
-    parser.add_argument('--folder_path_pattern', type=str, default='./review_data/segments/{}')
-    parser.add_argument('--positive_directory', type=str, default='./review_data/positive_segments/{}')
-    parser.add_argument('--negative_directory', type=str, default='./review_data/negative_segments/{}')
+    parser.add_argument('--folder_path_pattern', type=str, default='../review_data/segments/{}')
+    parser.add_argument('--positive_directory', type=str, default='../review_data/positive_segments/{}')
+    parser.add_argument('--negative_directory', type=str, default='../review_data/negative_segments/{}')
     parser.add_argument("--inference", type=bool, default=True)
     args = parser.parse_args()
 

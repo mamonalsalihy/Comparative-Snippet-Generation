@@ -214,6 +214,14 @@ This is the command I use for segmentation (could automate by writing shell scri
 ### Review segment PostProcessing 
 
 1.Could add more part of speech patterns for accepting valid segments
+2. Alternatively could use a classifer to identify which segments are grammtical
+   1. The authors note: 
+      1. "After extracting segments from
+these reviews, we consider only those segments for
+the summary generation which have part-of-speech
+patterns similar to hand-curated segments extracted
+in the first phase. Thus, we can ensure syntactic
+validity of the segments"
 
 
 

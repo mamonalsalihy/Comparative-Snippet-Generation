@@ -154,3 +154,12 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    # with open('unique_spacy_pos_pattern.pkl', 'rb') as fd:
+    #     pattern_set = pickle.load(fd)['pattern']
+    #
+    # token_list, pos_tuple = pre_process_and_validation_check('Anthelios is the best broad spectrum')
+    # if token_list:
+    #     segment = " ".join([token.text for token in token_list])
+    #     if pos_tuple in pattern_set and len(segment) == len(segment.encode('utf8')):
+    #         print("check")
