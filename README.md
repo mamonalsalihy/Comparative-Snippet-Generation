@@ -7,9 +7,10 @@
 ## Data Collection
 
 Product reviews are collected from Amazon using the following script `rainforest_data_collection.py`.
+
 It contains two different functionalities: 
 1. Gets products given a `search_term`
-2. Gets product reviews and saves them with the following file format: `./review_data/txt/review_{asin}.txt` 
+2. Gets product reviews and saves them with the following file format: `review_{asin}.txt` 
 
 The API request for getting products using a `search_term` follow the following format:
  
@@ -62,14 +63,29 @@ The API request for getting product reviews follow the following format:
 
 
 ### Feng Hirst Parser
-This is the command I use for segmentation (could automate by writing shell script)
 
-Add all review files to `/tmp/txt`
+Changes I made to the original code base are in `Dockerfile` (there might be more steps that I am forgetting)
+```
+WORKDIR /opt
+COPY . /opt/feng-hirst-rst-parser
+```
 
-`docker run -v D:\Brain\Comparative_Snippet_Generation\feng-hirst-rst-parser\tmp:/tmp -ti feng-hirst /tmp/txt/review_B00AEN4QZ8.txt --skip
-_parsing`
+Since the previous step is already completed by cloning the project, proceed with doing the following steps: 
+1. Add all review files to `feng-hirst-rst-parser/tmp/txt` 
 
-The results will be stored in `./tmp`
+2. Give run permission to `get_edus.sh` which will run the docker container for each file in `/tmp/txt`
+
+    ```
+    chmod +x get_edus.sh
+    ./get_edus.sh
+    ```
+### Notes
+1. Some reviews are not in unicode so edu segmentation fails.
+2. Suggestion: Create a separate terminal process to run `./get_edus.sh`
+3. For each file, we need to create a new docker container and mount the same directory
+4. The results will be stored in `./tmp`
+
+
 
 ### Post-processing segments
 Filtering rules are given in: [Comparative_snippet_generation](github.com/WING-NUS/comparative-snippet-generation-dataset)
@@ -159,13 +175,6 @@ Summaries are stored in `../qt/outputs/general_run1` where each file corresponds
 
 
 
-
-
-
-
-
-
-
 ## Places to improve the pipeline
 ### Data collection
    1. Use `most-helpful` product reviews (snippets should be informative about the product)
@@ -188,9 +197,17 @@ Summaries are stored in `../qt/outputs/general_run1` where each file corresponds
            else:
              continue
       ````
-### Review Segmentation 
+      
+### Feng-Hirst-RST-Parser
+
+This is the command I use for segmentation (could automate by writing shell script)
+
+
+### Review segment PostProcessing 
 
 1.Could add more part of speech patterns for accepting valid segments
+
+
 
 ### Opinion Summarization
 
