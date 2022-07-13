@@ -76,7 +76,7 @@ def inference(args):
 
         dataset = dataset.map(encode, batched=True, batch_size=args.train_batch_size)
 
-        dataset = dataset.remove_columns('text')
+        # dataset = dataset.remove_columns('text')
 
         training_args = TrainingArguments(
             output_dir=args.output_data_dir,

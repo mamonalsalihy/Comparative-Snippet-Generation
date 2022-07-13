@@ -36,6 +36,7 @@ def main():
     args = parser.parse_args()
 
     convert_to_json(args.input_folder, args.output_file)
+    print("Finished creating {}".format(args.output_file.split('/')[-1]))
 
 
 if __name__ == '__main__':
