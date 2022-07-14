@@ -1,5 +1,6 @@
 import argparse
 import collections
+import os
 
 import requests as requests
 from tqdm import tqdm
@@ -43,6 +44,8 @@ class Rainforest:
                 else:
                     continue
             if save:
+                if not os.path.isdir("/".join(file_path_pattern.split("/")[:-1])):
+                    os.mkdir("/".join(file_path_pattern.split("/")[:-1]))
                 self.save_reviews(all_reviews, file_path_pattern.format(asin))
             else:
                 product_reviews[asin].append(all_reviews)
