@@ -100,8 +100,7 @@ class Segmentation:
     def __init__(self, folder_path, output_file_pattern):
         self.folder_path = folder_path
         self.output_file_pattern = output_file_pattern
-        segment_dir = output_file_pattern.split('/')[-2]
-        if not os.path.isdir(segment_dir):
+        if not os.path.isdir(output_file_pattern[:-3]):
             os.mkdir(output_file_pattern[:-3])
 
         self.postprocess_by_file()
@@ -134,7 +133,7 @@ class Segmentation:
                     token_list, pos_tuple = pre_process_and_validation_check(segment)
                     if token_list:
                         segment = " ".join([token.text for token in token_list])
-                        if pos_tuple in pattern_set and len(segment) == len(segment.encode('utf8')):
+                        if len(segment) == len(segment.encode('utf8')):
                             with open(output_path, 'a') as f_out:
                                 f_out.write(segment)
                                 f_out.write("\n")
