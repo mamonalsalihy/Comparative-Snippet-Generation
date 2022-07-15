@@ -60,7 +60,9 @@ class Rainforest:
         params = {
             'amazon_domain': 'amazon.com',
             'type': 'search',
-            'search_term': search_term
+            'search_term': search_term,
+            'page': 1,
+            'max_page': 5
         }
         results = requests.get(rainforest_url, params=params, headers=self.dev_headers).json()['search_results']
         asins = [product['asin'] for product in results]
