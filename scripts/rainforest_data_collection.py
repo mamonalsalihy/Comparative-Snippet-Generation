@@ -51,7 +51,7 @@ class Rainforest:
                 product_reviews[asin].append(all_reviews)
         return product_reviews
 
-    def get_products(self, search_term):
+    def get_products(self, search_term, max_page):
         """
         Could later change this to get_asins
         :param search_term:
@@ -62,7 +62,7 @@ class Rainforest:
             'type': 'search',
             'search_term': search_term,
             'page': 1,
-            'max_page': 5
+            'max_page': max_page
         }
         results = requests.get(rainforest_url, params=params, headers=self.dev_headers).json()['search_results']
         asins = [product['asin'] for product in results]
@@ -86,7 +86,7 @@ def main():
 
     rainforest = Rainforest(args.rainforest_token)
 
-    asins = rainforest.get_products(args.search_term)
+    asins = rainforest.get_products(args.search_term, args.max_page)
     product_reviews = rainforest.get_reviews(asins, args.max_page, file_path_pattern=args.file_path)
 
 
