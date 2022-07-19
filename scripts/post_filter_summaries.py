@@ -12,27 +12,28 @@ def sort_by_length(args):
             path = args.output_folder_pos
         else:
             path = args.output_folder_neg
-        with open(os.path.join(path, file), "w+") as out_f:
-            with open(os.path.join(args.input_folder, file), "r") as in_f:
-                line_list = []
-                for line in in_f:
-                    word_list = []
-                    try:
-                        for token in en_spacy(line.strip()):
-                            if token.tag_ == "VBD" or \
-                                    token.tag_ == "VBN" or \
-                                    token.tag_ == "MD":
-                                word_list.append(getLemma(token.text, upos="VERB")[0])
-                            else:
-                                word_list.append(token.text)
-                    except:
-                        continue
-                    line_list.append((len(word_list), " ".join(word_list)))
+        if args.sentiment in file:
+            with open(os.path.join(path, file), "w+") as out_f:
+                with open(os.path.join(args.input_folder, file), "r") as in_f:
+                    line_list = []
+                    for line in in_f:
+                        word_list = []
+                        try:
+                            for token in en_spacy(line.strip()):
+                                if token.tag_ == "VBD" or \
+                                        token.tag_ == "VBN" or \
+                                        token.tag_ == "MD":
+                                    word_list.append(getLemma(token.text, upos="VERB")[0])
+                                else:
+                                    word_list.append(token.text)
+                        except:
+                            continue
+                        line_list.append((len(word_list), " ".join(word_list)))
 
-                sorted_line_list = sorted(line_list, key=lambda x: x[0], reverse=True)
+                    sorted_line_list = sorted(line_list, key=lambda x: x[0], reverse=True)
 
-                for elem in sorted_line_list:
-                    out_f.write(elem[1] + "\n")
+                    for elem in sorted_line_list:
+                        out_f.write(elem[1] + "\n")
 
 
 def filter_by_last_word(args):
