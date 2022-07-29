@@ -1,6 +1,7 @@
 import argparse
 import collections
 import os
+import concurrent.futures
 
 import requests as requests
 from tqdm import tqdm
@@ -18,37 +19,41 @@ class Rainforest:
         }
 
     def get_reviews(self, asins, max_page, save=True, file_path_pattern=None):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {executor.submit(self.temp, asin) for asin in asins}
+            data = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    def temp(self, asin, max_page=5, save=True, file_path_pattern='../review_data/txt/review_{}.txt'):
         product_reviews = collections.defaultdict(list)
-        for asin in tqdm(asins):
-            params = {
-                'type': 'reviews',
-                'amazon_domain': 'amazon.com',
-                'asin': asin,
-                'sort_by': 'most_helpful',
-                'page': 1,
-                'max_page': max_page
-            }
-            response = requests.get(rainforest_url, params=params, headers=self.dev_headers)
-            if response.status_code != 200:
-                continue
-            response = response.json()
-            print("Number of reviews: {}".format(len(response.get('reviews', []))))
-            all_reviews = []
-            for res in response.get('reviews', []):
-                if res:
-                    text = res.get('body', "")
-                    if text != '':
-                        all_reviews.append(text)
-                    else:
-                        continue
+        params = {
+            'type': 'reviews',
+            'amazon_domain': 'amazon.com',
+            'asin': asin,
+            'sort_by': 'most_helpful',
+            'page': 1,
+            'max_page': max_page
+        }
+        response = requests.get(rainforest_url, params=params, headers=self.dev_headers)
+        if response.status_code != 200:
+            return
+        response = response.json()
+        print("Number of reviews: {}".format(len(response.get('reviews', []))))
+        all_reviews = []
+        for res in response.get('reviews', []):
+            if res:
+                text = res.get('body', "")
+                if text != '':
+                    all_reviews.append(text)
                 else:
                     continue
-            if save:
-                if not os.path.isdir("/".join(file_path_pattern.split("/")[:-1])):
-                    os.mkdir("/".join(file_path_pattern.split("/")[:-1]))
-                self.save_reviews(all_reviews, file_path_pattern.format(asin))
             else:
-                product_reviews[asin].append(all_reviews)
+                continue
+        if save:
+            if not os.path.isdir("/".join(file_path_pattern.split("/")[:-1])):
+                os.mkdir("/".join(file_path_pattern.split("/")[:-1]))
+            self.save_reviews(all_reviews, file_path_pattern.format(asin))
+        else:
+            product_reviews[asin].append(all_reviews)
         return product_reviews
 
     def get_products(self, search_term):
