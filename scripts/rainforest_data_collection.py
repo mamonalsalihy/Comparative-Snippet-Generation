@@ -20,10 +20,10 @@ class Rainforest:
 
     def get_reviews(self, asins, max_page, save=True, file_path_pattern=None):
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            futures = {executor.submit(self.temp, asin) for asin in asins}
+            futures = {executor.submit(self.review_worker, asin) for asin in asins}
             data = [future.result() for future in concurrent.futures.as_completed(futures)]
 
-    def temp(self, asin, max_page=5, save=True, file_path_pattern='../review_data/txt/review_{}.txt'):
+    def review_worker(self, asin, max_page=5, save=True, file_path_pattern='../review_data/txt/review_{}.txt'):
         product_reviews = collections.defaultdict(list)
         params = {
             'type': 'reviews',
