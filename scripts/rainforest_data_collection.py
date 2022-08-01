@@ -12,6 +12,9 @@ class Rainforest:
     sort_by most_helpful --> top_rated on amazon.com
     reviewer_type verified_purchase --> negligible number of reviews filtered.
     review_stars all_positive, all_critical is the same as all_stars (it's a combination of the two)
+    Data collection methodology is mostly optimal over all review api parameters, could use search_term for future use
+    Reviews have a power law distribution as determined by social importance. Reviews in pages after 1, probably aren't
+    socially important.
     """
     global rainforest_url
     rainforest_url = "https://api-dev.braininc.net/be/shopping/rainforest/request"

@@ -97,6 +97,10 @@ def pre_process_and_validation_check(segment):
 
 
 class Segmentation:
+    """
+    Segment length has a strong effect on opinion summary quality. Currently, any segments that are less than
+    6 words are filtered. This may or may not be optimal, but it seems close to a threshold for performance.
+    """
     def __init__(self, folder_path, output_file_pattern):
         self.folder_path = folder_path
         self.output_file_pattern = output_file_pattern
@@ -116,24 +120,25 @@ class Segmentation:
 
     @staticmethod
     def postprocess_segments(file_path, output_path):
-        pattern_2 = re.compile(r"-[A-Z]{3}-")
+        pattern_1 = re.compile(r"-[A-Z]{3}-")
+        pattern_2 = re.compile(r"[\`\'.]")
 
-        with open('unique_spacy_pos_pattern.pkl', 'rb') as fd:
-            pattern_set = pickle.load(fd)['pattern']
+        # with open('unique_spacy_pos_pattern.pkl', 'rb') as fd:
+        #     pattern_set = pickle.load(fd)['pattern']
 
         with open(file_path, encoding='utf8') as fd:
             for line in fd:
+                line = line.strip()
                 if 'eos-eos' in line or len(line) < 4:
                     continue
                 segments = line.split("EDU_BREAK")
                 for segment in segments:
-                    segment = pattern_2.sub("", segment)
-                    segment = segment.lower()
-                    segment = " ".join(segment.split())
+                    segment = pattern_1.sub("", segment).lower().strip()
+                    segment = pattern_2.sub("", segment).strip()
                     token_list, pos_tuple = pre_process_and_validation_check(segment)
                     if token_list:
                         segment = " ".join([token.text for token in token_list])
-                        if len(segment) == len(segment.encode('utf8')):
+                        if len(segment) == len(segment.encode('utf8')) and len(segment.split()) >= 7:
                             with open(output_path, 'a') as f_out:
                                 f_out.write(segment)
                                 f_out.write("\n")
