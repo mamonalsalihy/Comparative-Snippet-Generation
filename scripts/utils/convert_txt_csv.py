@@ -24,7 +24,7 @@ def main():
                 result.append(data)
 
     df = pd.DataFrame(result)
-    df.to_csv('./spot-data/data/spot-yelp13-edus.csv', index=False)
+    df.to_csv('../../spot-data/data/spot-yelp13-edus.csv', index=False)
 
 
 if __name__ == '__main__':
