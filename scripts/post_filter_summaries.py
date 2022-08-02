@@ -12,6 +12,8 @@ def sort_by_length(args):
             path = args.output_folder_pos
         else:
             path = args.output_folder_neg
+        if args.sentiment not in file:
+            continue
         with open(os.path.join(path, file), "w+") as out_f:
             with open(os.path.join(args.input_folder, file), "r") as in_f:
                 line_list = []
