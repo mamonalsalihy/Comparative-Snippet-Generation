@@ -3,7 +3,7 @@ import pandas as pd
 
 def main():
     result = []
-    with open('../spot-data/data/spot-yelp13-edus.txt') as fd:
+    with open('../../spot-data/data/spot-yelp13-edus.txt') as fd:
         for line in fd:
             data = {}
             line = line.split()
@@ -24,7 +24,7 @@ def main():
                 result.append(data)
 
     df = pd.DataFrame(result)
-    df.to_csv('./spot-data/data/spot-yelp13-edus.csv', index=False)
+    df.to_csv('../../spot-data/data/spot-yelp13-edus.csv', index=False)
 
 
 if __name__ == '__main__':
